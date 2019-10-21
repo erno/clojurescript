@@ -2014,13 +2014,21 @@
   (ana/warning :unsupported-preprocess-value @env/*compiler* ijs)
   ijs)
 
+
+
+(defn trunc
+  [s n]
+  (subs s 0 (min (count s) n)))
+
 (defn write-javascript
   "Write or copy a JavaScript file to output directory. Only write if the file
    does not already exist. Return IJavaScript for the file on disk at the new
    location."
   [opts js]
   (let [out-dir    (io/file (util/output-directory opts))
+        _ (println "calling (rel-output-path" (trunc (pr-str js) 300) (pr-str opts) ")")
         out-name   (rel-output-path js opts)
+        _ (println "got:" (pr-str out-name))
         out-file   (io/file out-dir out-name)
         res        (or (:url js) (:source-file js))
         js-module? (and res out-dir
