@@ -1843,12 +1843,19 @@
 
 (defn lib-rel-path [{:keys [lib-path url provides] :as ijs}]
   (if (nil? lib-path)
-    (util/ns->relpath (first provides) "js")
+    (do
+      (println "lib-path nil -> " (first provides) (util/ns->relpath (first provides) "js"))
+      (util/ns->relpath (first provides) "js"))
     (if (.endsWith lib-path ".js")
-      (util/get-name url)
+      (do
+        (println "get-name" url)
+        (util/get-name url))
       (let [path (util/path url)
+            lib-path-old lib-path
             lib-path (util/normalize-path lib-path)]
-        (subs path (+ (inc (.lastIndexOf path lib-path)) (.length lib-path)))))))
+        (do
+          (println "subs for" lib-path-old)
+          (subs path (+ (inc (.lastIndexOf path lib-path)) (.length lib-path))))))))
 
 (defn ^String rel-output-path
   "Given a IJavaScript which points to a .js file either in memory, in a jar file,
@@ -1862,9 +1869,14 @@
      (cond
        url
        (cond
-         (deps/-closure-lib? js) (lib-rel-path js)
-         (deps/-foreign? js) (or (deps/-relative-path js opts)
-                                 (util/relative-name url))
+         (deps/-closure-lib? js) (do
+                                   (println "got closure-lib url" url "which yields" (lib-rel-path js))
+                                   (lib-rel-path js)) 
+         (deps/-foreign? js) (do
+                               (println "got foreign url" url "which yields" (or (deps/-relative-path js opts)
+                                      (util/relative-name url)))
+                               (or (deps/-relative-path js opts)
+                                      (util/relative-name url)))
          :else (path-from-jarfile url))
 
        (string? js)
